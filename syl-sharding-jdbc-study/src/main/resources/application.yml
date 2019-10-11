@@ -1,0 +1,60 @@
+spring:
+  profiles:
+    active: only-shard-table
+---
+#######################################
+## 只分库 不分表的情况
+#########################################
+spring:
+  profiles: only-shard-db # 只分库
+  shardingsphere:
+    datasource:
+      names: order0,order1
+      order0:
+        type: org.apache.commons.dbcp2.BasicDataSource
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        url: jdbc:mysql://10.122.42.89:3306/order0?Unicode=true&characterEncoding=UTF-8&serverTimezone=UTC
+        username: root
+        password: Syl_956469025
+      order1:
+        type: org.apache.commons.dbcp2.BasicDataSource
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        url: jdbc:mysql://10.122.42.89:3306/order1?Unicode=true&characterEncoding=UTF-8&serverTimezone=UTC
+        username: root
+        password: Syl_956469025
+    sharding:
+      default-database-strategy:
+        inline:
+          sharding-column: user_id
+          algorithm-expression: order$->{user_id % 2}
+      tables:
+        t_order: # 逻辑表名
+          actual-data-nodes: order$->{0..1}.t_order
+---
+#######################################
+## 不分库 只分表的情况
+#########################################
+spring:
+  profiles: only-shard-table # 只分库
+  shardingsphere:
+    datasource:
+      names: order0
+      order0:
+        type: org.apache.commons.dbcp2.BasicDataSource
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        url: jdbc:mysql://10.122.42.89:3306/order0?Unicode=true&characterEncoding=UTF-8&serverTimezone=UTC
+        username: root
+        password: Syl_956469025
+    sharding:
+      default-table-strategy:
+        standard:
+          sharding-column: birth
+          precise-algorithm-class-name: syl.study.shardingjdbc.strategy.UserTableShardStrategy
+      tables:
+        t_user: # 逻辑表名
+          actual-data-nodes: order0.t_user_2018_0$->{1..9},order0.t_user_2018_$->{10..12}
+
+
+
+
+
